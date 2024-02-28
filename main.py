@@ -47,7 +47,9 @@ def parse_args():
         username, password = "", ""
 
     if ":" not in args.credentials and args.credentials != "":
-        exit_with_error("Invalid credentials format. Use the following format: username:password")
+        exit_with_error(
+            "Invalid credentials format. Use the following format: username:password"
+        )
 
     return username, password, args.serial, args.url
 
@@ -62,6 +64,7 @@ def get_filename(content_disposition):
     return filename
 
 
+# Sends a GET request to the given URL and returns the response
 def get_response(url, username, password):
     authorization_needed = username != "" and password != ""
 
@@ -78,7 +81,8 @@ def get_response(url, username, password):
     return response
 
 
-def download_file(response, filename, extension, serial):
+# Downloads the file from the response to the working directory
+def download_file(response, filename):
     if os.path.exists(os.path.join(WORKING_DIR, filename)):
         os.remove(os.path.join(WORKING_DIR, filename))
 
@@ -88,16 +92,19 @@ def download_file(response, filename, extension, serial):
     logging.debug(f"File {filename} has been downloaded")
 
 
+# Extracts the zip archive to the destination path
 def extractor_zip(archive_path, destination_path):
     with zipfile.ZipFile(archive_path, "r") as zip_ref:
         zip_ref.extractall(destination_path)
 
 
+# Extracts the tar.bz2 archive to the destination path
 def extractor_tar_bz2(archive_path, destination_path):
     with tarfile.open(archive_path, "r:bz2") as tar:
         tar.extractall(destination_path)
 
 
+# Extracts the tar.zst archive to the destination path
 def extractor_tar_zst(archive_path, destination_path):
     with open(archive_path, "rb") as file:
         decompressed_data = pyzstd.decompress(file.read())
@@ -111,6 +118,7 @@ def extractor_tar_zst(archive_path, destination_path):
         tar.extractall(destination_path)
 
 
+# Mappping of file extensions to the appropriate extractor
 EXTRACTORS = {
     ".zip": extractor_zip,
     ".tar.bz2": extractor_tar_bz2,
@@ -118,7 +126,7 @@ EXTRACTORS = {
 }
 
 
-# Extracts the archive to the destination path
+# Extracts the archive to the destination path using the appropriate extractor
 def extract_archive(archive_path, destination_path, extension):
     if extension not in EXTRACTORS:
         exit_with_error(f"Unsupported extension: {extension}")
@@ -147,7 +155,7 @@ def main():
     filename = get_filename(response.headers["Content-Disposition"])
     extension = os.path.splitext(filename)[1]
 
-    download_file(response, filename, extension, serial)
+    download_file(response, filename)
 
     extract_archive(
         os.path.join(WORKING_DIR, filename),
