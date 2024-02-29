@@ -16,25 +16,25 @@ SCRIPT_NAME = "flash.sh"
 
 
 # Called at the beginning of the script to initialize the prerequisites
-def initialize():
+def initialize() -> None:
     if not os.path.exists(WORKING_DIR):
         os.mkdir(WORKING_DIR)
 
 
 # Called at the end of the script to clean up the resources
-def deinitialize():
+def deinitialize() -> None:
     if os.path.exists(WORKING_DIR):
         os.rmdir(WORKING_DIR)
 
 
-def exit_with_error(message):
+def exit_with_error(message: str) -> None:
     logging.error(message)
     deinitialize()
     sys.exit(1)
 
 
 # Parses the command line arguments and returns the values
-def parse_args():
+def parse_args() -> tuple[str, str, str, str]:
     parser = argparse.ArgumentParser()
     parser.add_argument("--credentials", help="Username and password", default="")
     parser.add_argument("serial", help="Serial number of the device")
@@ -55,7 +55,7 @@ def parse_args():
 
 
 # Extracts the filename and extension from the Content-Disposition header
-def get_filename(content_disposition):
+def get_filename(content_disposition: str) -> str:
     start = content_disposition.find("filename=") + len("filename=")
     end = content_disposition.find(";", start)
 
@@ -65,7 +65,7 @@ def get_filename(content_disposition):
 
 
 # Sends a GET request to the given URL and returns the response
-def get_response(url, username, password):
+def get_response(url: str, username: str, password: str) -> requests.Response:
     auth = HTTPBasicAuth(username, password) if username and password else None
     response = requests.get(url, auth=auth)
 
@@ -77,7 +77,7 @@ def get_response(url, username, password):
 
 
 # Downloads the file from the response to the working directory
-def download_file(response, filename):
+def download_file(response: requests.Response, filename: str) -> None:
     if os.path.exists(os.path.join(WORKING_DIR, filename)):
         os.remove(os.path.join(WORKING_DIR, filename))
 
@@ -88,19 +88,19 @@ def download_file(response, filename):
 
 
 # Extracts the zip archive to the destination path
-def extractor_zip(archive_path, destination_path):
+def extractor_zip(archive_path: str, destination_path: str) -> None:
     with zipfile.ZipFile(archive_path, "r") as zip_ref:
         zip_ref.extractall(destination_path)
 
 
 # Extracts the tar.bz2 archive to the destination path
-def extractor_tar_bz2(archive_path, destination_path):
+def extractor_tar_bz2(archive_path: str, destination_path: str) -> None:
     with tarfile.open(archive_path, "r:bz2") as tar:
         tar.extractall(destination_path)
 
 
 # Extracts the tar.zst archive to the destination path
-def extractor_tar_zst(archive_path, destination_path):
+def extractor_tar_zst(archive_path: str, destination_path: str) -> None:
     with open(archive_path, "rb") as file:
         decompressed_data = pyzstd.decompress(file.read())
 
@@ -122,7 +122,7 @@ EXTRACTORS = {
 
 
 # Extracts the archive to the destination path using the appropriate extractor
-def extract_archive(archive_path, destination_path, extension):
+def extract_archive(archive_path: str, destination_path: str, extension: str) -> None:
     if extension not in EXTRACTORS:
         exit_with_error(f"Unsupported extension: {extension}")
 
@@ -130,7 +130,7 @@ def extract_archive(archive_path, destination_path, extension):
 
 
 # Runs the flash.sh script to flash the device
-def run_flash_script(script_path, serial):
+def run_flash_script(script_path: str, serial: str) -> None:
     subprocess.run(["chmod", "+x", script_path])
 
     logging.debug("Flashing the device")
@@ -142,7 +142,7 @@ def run_flash_script(script_path, serial):
     logging.debug("Device has been rebooted")
 
 
-def main():
+def main() -> None:
     # Parse the command line arguments
     username, password, serial, url = parse_args()
 
