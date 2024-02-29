@@ -41,15 +41,15 @@ def parse_args():
     parser.add_argument("url", help="URL of the file to download")
     args = parser.parse_args()
 
-    if args.credentials:
-        username, password = args.credentials.split(":")
-    else:
-        username, password = "", ""
-
     if ":" not in args.credentials and args.credentials != "":
         exit_with_error(
             "Invalid credentials format. Use the following format: username:password"
         )
+
+    if args.credentials:
+        username, password = args.credentials.split(":")
+    else:
+        username, password = "", ""
 
     return username, password, args.serial, args.url
 
@@ -66,13 +66,8 @@ def get_filename(content_disposition):
 
 # Sends a GET request to the given URL and returns the response
 def get_response(url, username, password):
-    authorization_needed = username != "" and password != ""
-
-    logging.debug(f"Sending request to {url}")
-    if authorization_needed:
-        response = requests.get(url, auth=HTTPBasicAuth(username, password))
-    else:
-        response = requests.get(url)
+    auth = HTTPBasicAuth(username, password) if username and password else None
+    response = requests.get(url, auth=auth)
 
     # Check if the request was successful
     if response.status_code != 200:
@@ -134,6 +129,7 @@ def extract_archive(archive_path, destination_path, extension):
     EXTRACTORS[extension](archive_path, destination_path)
 
 
+# Runs the flash.sh script to flash the device
 def run_flash_script(script_path, serial):
     subprocess.run(["chmod", "+x", script_path])
 
