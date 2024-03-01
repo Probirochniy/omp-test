@@ -126,8 +126,18 @@ EXTRACTORS = {
 }
 
 
+def get_full_extension(path):
+    basename = os.path.basename(path)
+    dot_index = basename.find('.')
+    if dot_index == -1:
+        return ""
+    else:
+        return basename[dot_index:]
+
+
 # Extracts the archive to the destination path using the appropriate extractor
-def extract_archive(archive_path: str, destination_path: str, extension: str) -> None:
+def extract_archive(archive_path: str, destination_path: str) -> None:
+    extension = get_full_extension(archive_path)
     if extension not in EXTRACTORS:
         exit_with_error(f"Unsupported extension: {extension}")
 
@@ -154,14 +164,12 @@ def main() -> None:
     response = get_response(url, username, password)
 
     filename = get_filename(response.headers["Content-Disposition"])
-    extension = os.path.splitext(filename)[1]
 
     download_file(response, filename)
 
     extract_archive(
         os.path.join(WORKING_DIR, filename),
-        WORKING_DIR,
-        extension,
+        WORKING_DIR
     )
 
     script_path = os.path.join(WORKING_DIR, SCRIPT_NAME)
