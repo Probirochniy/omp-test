@@ -57,10 +57,14 @@ def parse_args() -> tuple[str, str, str, str]:
 
 # Extracts the filename and extension from the Content-Disposition header
 def get_filename(content_disposition: str) -> str:
-    start = content_disposition.find("filename=") + len("filename=")
+    # +1 to remove the quotes from the filename
+    start = content_disposition.find("filename=") + len("filename=") + 1
     end = content_disposition.find(";", start)
-
+    
     filename = content_disposition[start:end]
+
+    if filename[-1] == '"':
+        filename = filename[:-1]
 
     return filename
 
