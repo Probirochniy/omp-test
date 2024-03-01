@@ -81,3 +81,12 @@ def test_extract_archive_tar_zst():
                 mock_tar_ref.extractall.assert_called_with("destination")
 
                 mock_decompress.assert_called()
+
+
+def test_get_full_extension():
+    from main import get_full_extension
+
+    assert get_full_extension("file.zip") == ".zip"
+    assert get_full_extension("file.tar.bz2") == ".tar.bz2"
+    assert get_full_extension("file.tar.zst") == ".tar.zst"
+    assert get_full_extension("file") == ""
