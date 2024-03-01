@@ -1,8 +1,5 @@
 import pytest
-import tarfile
-import zipfile
 from unittest.mock import MagicMock, patch
-import pyzstd
 
 
 def test_parse_args_valid():
