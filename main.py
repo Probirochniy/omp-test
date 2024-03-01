@@ -1,13 +1,14 @@
-import requests
 import sys
 import os
-from requests.auth import HTTPBasicAuth
 import logging
 import tarfile
 import zipfile
-import pyzstd
 import subprocess
 import argparse
+
+import requests
+from requests.auth import HTTPBasicAuth
+import pyzstd
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -104,7 +105,7 @@ def extractor_tar_zst(archive_path: str, destination_path: str) -> None:
     with open(archive_path, "rb") as file:
         decompressed_data = pyzstd.decompress(file.read())
 
-    temp_archive_path = os.path.dirname(archive_path) + "/temp.tar"
+    temp_archive_path = os.path.join(os.path.dirname(archive_path), "/temp.tar")
 
     with open(temp_archive_path, "wb") as file:
         file.write(decompressed_data)
